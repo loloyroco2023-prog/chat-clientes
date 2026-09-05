@@ -1,0 +1,102 @@
+===========================================
+ CÓMO PONER A FUNCIONAR TU CHAT DE CLIENTES
+===========================================
+
+No necesitás saber nada de computadoras. Solo seguí estos pasos
+uno por uno, en orden. Cada paso te dice EXACTAMENTE qué hacer.
+
+
+PASO 1: Instalar Python
+------------------------
+1. Andá a esta página: https://www.python.org/downloads/
+2. Apretá el botón grande amarillo que dice "Download Python".
+3. Abrí el archivo descargado.
+4. MUY IMPORTANTE: en la primera pantalla del instalador, marcá la
+   casillita que dice "Add Python to PATH" (abajo de todo).
+5. Apretá "Install Now" y esperá a que termine.
+
+
+PASO 2: Abrir la "Terminal" (símbolo del sistema)
+--------------------------------------------------
+1. Apretá la tecla de Windows y escribí: cmd
+2. Apretá Enter. Se abre una ventana negra con letras. Ahí vamos a
+   escribir comandos (no te preocupes, te digo cuáles).
+
+
+PASO 3: Ir a la carpeta del proyecto
+--------------------------------------
+En esa ventana negra, escribí este comando y apretá Enter
+(reemplazá la ruta si guardaste la carpeta en otro lugar):
+
+    cd Ruta\Donde\Guardaste\chat-clientes
+
+Por ejemplo, si la pusiste en el Escritorio:
+
+    cd Desktop\chat-clientes
+
+
+PASO 4: Instalar lo necesario para que funcione el chat
+----------------------------------------------------------
+Escribí este comando y apretá Enter (puede tardar un minuto):
+
+    pip install -r requirements.txt
+
+
+PASO 5: Prender el chat
+--------------------------
+Escribí este comando y apretá Enter:
+
+    uvicorn main:app --host 0.0.0.0 --port 8000
+
+Vas a ver unas líneas de texto que terminan más o menos así:
+"Uvicorn running on http://0.0.0.0:8000"
+
+Eso significa que el chat YA ESTÁ FUNCIONANDO. No cierres esta
+ventana negra mientras quieras que el chat siga andando.
+
+
+PASO 6: Probarlo vos mismo
+-----------------------------
+Abrí tu navegador (Chrome, Edge, el que uses) y entrá a:
+
+    http://localhost:8000
+
+Ahí vas a ver la pantalla de chat como la vería un cliente.
+Escribí un mensaje de prueba.
+
+
+PASO 7: Ver los mensajes y responder (tu panel)
+---------------------------------------------------
+Abrí OTRA pestaña del navegador y entrá a:
+
+    http://localhost:8000/panel
+
+Ahí vas a ver la lista de conversaciones. Hacé clic en una y
+vas a poder responder. Los mensajes se guardan solos, no se
+pierden aunque cierres todo.
+
+
+===========================================
+ CÓMO COMPARTIR EL CHAT CON TUS CLIENTES
+===========================================
+
+Mientras la ventana negra esté abierta y prendida (Paso 5), el
+chat funciona SOLO en tu propia computadora (http://localhost:8000
+solo lo ves vos). Para que tus clientes de verdad puedan entrar
+desde afuera, necesitás "publicar" tu chat en internet con un
+servicio de hosting.
+
+Esto es un paso aparte y más técnico. Cuando llegues a este punto,
+avisame y te voy guiando para elegir un hosting fácil (hay
+opciones gratuitas para empezar) y publicarlo ahí, para que te
+quede un link fijo tipo "michat.com" que le puedas pasar a
+cualquier cliente.
+
+
+===========================================
+ SI ALGO NO FUNCIONA
+===========================================
+
+Si en algún paso te aparece un error en la ventana negra, copiá
+el mensaje de error tal cual aparece y pasámelo. Lo reviso y te
+digo exactamente qué hacer.
