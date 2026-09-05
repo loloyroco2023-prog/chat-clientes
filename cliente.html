@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chat con nosotros</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .caja {
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    max-height: 700px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .encabezado {
+    background: #1f6feb;
+    color: white;
+    padding: 16px;
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .mensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .burbuja {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    line-height: 1.4;
+    font-size: 15px;
+  }
+  .burbuja.cliente {
+    align-self: flex-end;
+    background: #1f6feb;
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+  .burbuja.admin {
+    align-self: flex-start;
+    background: #e9e9eb;
+    color: #222;
+    border-bottom-left-radius: 4px;
+  }
+  form {
+    display: flex;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    gap: 8px;
+  }
+  input[type=text] {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    outline: none;
+  }
+  button {
+    background: #1f6feb;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 0 20px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  #pantalla-nombre {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+    flex: 1;
+  }
+  #pantalla-nombre input {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+  }
+  #pantalla-nombre button {
+    border-radius: 8px;
+    padding: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="caja">
+  <div class="encabezado">Chat con nosotros</div>
+
+  <div id="pantalla-nombre">
+    <p>¡Hola! ¿Cómo te llamás?</p>
+    <input type="text" id="input-nombre" placeholder="Tu nombre" />
+    <button onclick="empezarChat()">Empezar a chatear</button>
+  </div>
+
+  <div class="mensajes" id="mensajes" style="display:none;"></div>
+
+  <form id="form-mensaje" style="display:none;" onsubmit="enviarMensaje(event)">
+    <input type="text" id="input-mensaje" placeholder="Escribí tu mensaje..." autocomplete="off" />
+    <button type="submit">Enviar</button>
+  </form>
+</div>
+
+<script>
+  // Cada visitante tiene un identificador único guardado en su navegador,
+  // así si cierra la página y vuelve, sigue la misma conversación.
+  let sessionId = localStorage.getItem("chat_session_id");
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    localStorage.setItem("chat_session_id", sessionId);
+  }
+
+  const protocolo = location.protocol === "https:" ? "wss:" : "ws:";
+  const socket = new WebSocket(`${protocolo}//${location.host}/ws/cliente/${sessionId}`);
+
+  const divMensajes = document.getElementById("mensajes");
+  const pantallaNombre = document.getElementById("pantalla-nombre");
+  const formMensaje = document.getElementById("form-mensaje");
+
+  let yaSaludo = localStorage.getItem("chat_nombre_puesto") === "true";
+
+  function agregarBurbuja(remitente, texto) {
+    const burbuja = document.createElement("div");
+    burbuja.className = "burbuja " + remitente;
+    burbuja.textContent = texto;
+    divMensajes.appendChild(burbuja);
+    divMensajes.scrollTop = divMensajes.scrollHeight;
+  }
+
+  function mostrarChat() {
+    pantallaNombre.style.display = "none";
+    divMensajes.style.display = "flex";
+    formMensaje.style.display = "flex";
+  }
+
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.tipo === "historial") {
+      if (data.mensajes.length > 0) {
+        mostrarChat();
+        data.mensajes.forEach((m) => agregarBurbuja(m.remitente, m.texto));
+      }
+    } else if (data.tipo === "mensaje_nuevo") {
+      agregarBurbuja(data.remitente, data.texto);
+    }
+  };
+
+  function empezarChat() {
+    const nombre = document.getElementById("input-nombre").value.trim();
+    if (!nombre) return;
+    localStorage.setItem("chat_nombre_puesto", "true");
+    mostrarChat();
+    socket.send(JSON.stringify({ nombre: nombre, texto: `${nombre} se unió al chat.` }));
+  }
+
+  // Si ya había puesto el nombre antes, saltamos directo al chat
+  if (yaSaludo) {
+    mostrarChat();
+  }
+
+  function enviarMensaje(event) {
+    event.preventDefault();
+    const input = document.getElementById("input-mensaje");
+    const texto = input.value.trim();
+    if (!texto) return;
+    socket.send(JSON.stringify({ texto: texto }));
+    agregarBurbuja("cliente", texto);
+    input.value = "";
+  }
+</script>
+
+</body>
+</html>
